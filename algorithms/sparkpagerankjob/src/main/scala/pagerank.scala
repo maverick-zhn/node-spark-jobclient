@@ -1,3 +1,38 @@
+/*
+
+ ________                                                 _______   _______
+/        |                                               /       \ /       \
+$$$$$$$$/______   __    __   ______   _______    ______  $$$$$$$  |$$$$$$$  |
+   $$ | /      \ /  |  /  | /      \ /       \  /      \ $$ |  $$ |$$ |__$$ |
+   $$ |/$$$$$$  |$$ |  $$ |/$$$$$$  |$$$$$$$  |/$$$$$$  |$$ |  $$ |$$    $$<
+   $$ |$$ |  $$/ $$ |  $$ |$$    $$ |$$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$$  |
+   $$ |$$ |      $$ \__$$ |$$$$$$$$/ $$ |  $$ |$$ \__$$ |$$ |__$$ |$$ |__$$ |
+   $$ |$$ |      $$    $$/ $$       |$$ |  $$ |$$    $$/ $$    $$/ $$    $$/
+   $$/ $$/        $$$$$$/   $$$$$$$/ $$/   $$/  $$$$$$/  $$$$$$$/  $$$$$$$/
+
+ */
+
+
+/** In God we trust
+  * @author Servio Palacios
+  * @date_creation 2016.05.26.
+  * @module pagerank.scala
+  * @description Spark Job Connector using REST API
+  *
+  */
+
+/**
+  * Run a dynamic version of PageRank returning a graph with vertex attributes containing the
+  * PageRank and edge attributes containing the normalized edge weight.
+  *
+  * @param graph the graph on which to compute PageRank
+  * @param tol the tolerance allowed at convergence (smaller => more accurate).
+  * @param resetProb the random reset probability (alpha)
+  *
+  * @return the graph containing with each vertex containing the PageRank and each edge
+  *         containing the normalized weight.
+  */
+
 package spark.jobserver
 
 import com.typesafe.config.{Config, ConfigFactory}
@@ -37,7 +72,8 @@ object PageRank extends SparkJob {
 
     override def runJob(sc: SparkContext, config: Config): Any = {
         //get table from keyspace and stored as rdd
-        val vertexRDD1: RDD[(VertexId, String)] = sc.cassandraTable(config.getString("input.string"), "vertices2")
+        val vertexRDD1: RDD[(VertexId, String)] =
+            sc.cassandraTable(config.getString("input.string"), "vertices2")
 
         val rowsCassandra: RDD[CassandraRow] = sc.cassandraTable(config.getString("input.string"), "edges")
                                                  .select("fromvertex", "tovertex")
@@ -58,6 +94,7 @@ object PageRank extends SparkJob {
         val graph = Graph(vertexSet, edgesRDD)
 
         // Run PageRank
+        //I can use a parameter from Web UI, adding this to the class
         val ranks = graph.pageRank(0.0001).vertices
         ranks.collect()
         //sc.parallelize(config.getString("input.string").split(" ").toSeq).countByValue
