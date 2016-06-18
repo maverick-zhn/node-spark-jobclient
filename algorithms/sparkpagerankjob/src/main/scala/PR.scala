@@ -70,20 +70,33 @@ object PR extends SparkJob {
     Try(config.getString("input.string"))
       .map(x => SparkJobValid)
       .getOrElse(SparkJobInvalid("No input.string config param"))
+
+    Try(config.getString("alpha.string"))
+      .map(x => SparkJobValid)
+      .getOrElse(SparkJobInvalid("No alpha.string config param"))
+
+    Try(config.getString("TOL.string"))
+      .map(x => SparkJobValid)
+      .getOrElse(SparkJobInvalid("No TOL.string config param"))
   }
 
   override def runJob(sc: SparkContext, config: Config): Any = {
 
+    val schema = config.getString("input.string")
+
     /* Get table from keyspace and stored as rdd */
-    val vertexRDD1: RDD[(VertexId, String)] = sc.cassandraTable(config.getString("input.string"), "vertices")
+    val vertexRDD1: RDD[(VertexId, String)] = sc.cassandraTable(schema, "vertices")
 
     /* Get Cassandra Row and Select id */
-    val vertexCassandra: RDD[CassandraRow] = sc.cassandraTable(config.getString("input.string"), "vertices")
-                                          .select("id")
+    val vertexCassandra: RDD[CassandraRow] = sc.cassandraTable(schema, "vertices")
+                                               .select("id")
 
     /* Convert Cassandra Row into Spark's RDD */
-    val rowsCassandra: RDD[CassandraRow] = sc.cassandraTable(config.getString("input.string"), "edges")
+    val rowsCassandra: RDD[CassandraRow] = sc.cassandraTable(schema, "edges")
                                              .select("fromv", "tov")
+
+    val alpha = config.getDouble("alpha.string")
+    val TOL = config.getDouble("TOL.string")
 
     /* Convert RDD into edgeRDD */
     val edgesRDD: RDD[Edge[Int]] = rowsCassandra.map(x =>
@@ -104,7 +117,7 @@ object PR extends SparkJob {
     /* Run PageRank */
     /* alpha = 0.0001 */
     /* TODO Receive alpha parameter */
-    val ranks = graph.pageRank(0.0001).vertices
+    val ranks = graph.pageRank(TOL).vertices
 
     ranks.collect()
 
