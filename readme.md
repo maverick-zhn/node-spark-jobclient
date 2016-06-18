@@ -19,3 +19,12 @@
 * http://apache-spark-user-list.1001560.n3.nabble.com/GraphX-AssertionError-td13941.html
 * https://mail-archives.apache.org/mod_mbox/spark-user/201409.mbox/%3CCAOxQ-1nCATKsbFxVXJw_5Qy4gpfMDrqO_wtZOLnZdRNV2wOnAA@mail.gmail.com%3E
 * https://visionmedia.github.io/superagent/
+* http://pastebin.com/fhKbQdB3
+* http://pastebin.com/SGdz92aQ
+* http://ricostacruz.com/cheatsheets/bluebird.html
+* http://bluebirdjs.com/docs/why-bluebird.html
+* http://bluebirdjs.com/docs/api/promisification.html
+* https://github.com/lauris/awesome-scala
+* https://github.com/spark-jobserver/spark-jobserver#development-mode
+
+~~~subdue washington state university~~~
