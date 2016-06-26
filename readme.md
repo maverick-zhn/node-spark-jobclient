@@ -26,5 +26,6 @@
 * http://bluebirdjs.com/docs/api/promisification.html
 * https://github.com/lauris/awesome-scala
 * https://github.com/spark-jobserver/spark-jobserver#development-mode
+* http://www.vldb.org/2017/
 
 ~~~subdue washington state university~~~
