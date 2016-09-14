@@ -57,6 +57,7 @@ curl --data-binary @job-server-tests_2.10-0.7.0-SNAPSHOT.jar localhost:8090/jars
 ```
 
 ####Testing pagerank
+```
 curl -d "input.string = a b c a b see dimelo" 'localhost:8090/jobs?appName=pagerank&classPath=spark.jobserver.PageRank'
 {
   "status": "STARTED",
@@ -65,7 +66,7 @@ curl -d "input.string = a b c a b see dimelo" 'localhost:8090/jobs?appName=pager
     "context": "56501fa1-spark.jobserver.PageRank"
   }
 }
-
+```
 
 ####Classes
 ```
