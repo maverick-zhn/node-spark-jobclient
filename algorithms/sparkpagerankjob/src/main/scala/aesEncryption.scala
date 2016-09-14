@@ -56,6 +56,6 @@ object aesEncryption {
   }
 
   private val SALT: String =
-    "jMhKlOuJnM34G6NHkqo9V010GhLAqOpF0BePojHgh1HgNg8^72k"
+                    "jMhKlOuJnM34G6NHkqo9V010GhLAqOpF0BePojHgh1HgNg8^72k"
 
 }

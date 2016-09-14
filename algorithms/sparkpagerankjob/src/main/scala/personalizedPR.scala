@@ -13,8 +13,8 @@ $$$$$$$$/______   __    __   ______   _______    ______  $$$$$$$  |$$$$$$$  |
  */
 
 /**      In God we trust
-  * Created by: Servio Palacios on 2016.05.26.
-  * Source: PR.scala
+  * Created by: Servio Palacios on 2016.09.08.
+  * Source: personalizedPR.scala
   * Author: Servio Palacios
   * Description: Spark Job Connector using REST API
   */
@@ -55,7 +55,7 @@ object PR extends SparkJob {
     val conf = new SparkConf(true)
       .set("spark.cassandra.connection.host", "localhost")
       .setMaster("local[4]")
-      .setAppName("PageRankGN")
+      .setAppName("personalizedPR")
 
     val sc = new SparkContext(conf)
     val config = ConfigFactory.parseString("")
@@ -83,42 +83,16 @@ object PR extends SparkJob {
 
     val schema = config.getString("input.string")
 
-    /* Get table from keyspace and stored as rdd */
-    val vertexRDD1: RDD[(VertexId, String)] = sc.cassandraTable(schema, "vertices")
+    val g = GraphLoader.edgeListFile(sc, "cit-Hepth.txt")
 
-    /* Get Cassandra Row and Select id */
-    val vertexCassandra: RDD[CassandraRow] = sc.cassandraTable(schema, "vertices")
-                                               .select("id")
+    g.personalizedPageRank(9207016, 0.001)
+      .vertices
+        .filter(_._1 != 9207016)
+        .reduce((a,b) => if (a._2 > b._2) a else b)
 
-    /* Convert Cassandra Row into Spark's RDD */
-    val rowsCassandra: RDD[CassandraRow] = sc.cassandraTable(schema, "edges")
-                                             .select("fromv", "tov")
-
-    val alpha = config.getDouble("alpha.string")
-    val TOL = config.getDouble("TOL.string")
-
-    /* Convert RDD into edgeRDD */
-    val edgesRDD: RDD[Edge[Int]] = rowsCassandra.map(x =>
-      Edge(
-        x.getLong("fromv"),
-        x.getLong("tov")
-      ))
-
-    /* Collect Vertices */
-    /* TODO test on Cluster */
-    val vertex_collect = vertexRDD1.collect().take(1000)
-
-    val vertexSet = VertexRDD(vertexRDD1)
-
-    /* Build the initial Graph */
-    val graph = Graph(vertexSet, edgesRDD)
-
-    /* Run PageRank until convergence*/
-    /* alpha = 0.0001 */
-    val ranks = graph.pageRank(TOL).vertices
-
-    ranks.collect()
 
   }//runJob
 
 }//PR object
+
+
