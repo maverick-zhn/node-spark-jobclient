@@ -24,9 +24,9 @@ $$$$$$$$/______   __    __   ______   _______    ______  $$$$$$$  |$$$$$$$  |
   * Run a dynamic version of PageRank returning a graph with vertex attributes containing the
   * PageRank and edge attributes containing the normalized edge weight.
   *
-  * @param graph the graph on which to compute PageRank
-  * @param tol the tolerance allowed at convergence (smaller => more accurate).
-  * @param resetProb the random reset probability (alpha)
+  *  graph the graph on which to compute PageRank
+  *  tol the tolerance allowed at convergence (smaller => more accurate).
+  *  resetProb the random reset probability (alpha)
   *
   * @return the graph containing with each vertex containing the PageRank and each edge
   *         containing the normalized weight.
