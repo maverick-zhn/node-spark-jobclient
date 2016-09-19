@@ -54,7 +54,8 @@ object gnutellaPR extends SparkJob {
     //System.setProperty("spark.cassandra.query.retry.count", "1")
     //System.out.println(System.getProperty( "java.class.path"))
     val conf = new SparkConf(true)
-      .set("spark.cassandra.connection.host", "localhost")
+      .set("spark.cassandra.connection.host", "127.0.0.1")
+      .set("spark.cassandra.connection.port", "8003")
       .setMaster("local[4]")
       .setAppName("gnutella")
 

@@ -52,7 +52,8 @@ object TruenoPR extends SparkJob {
   def main(args: Array[String]) {
 
     val conf = new SparkConf(true)
-      .set("spark.cassandra.connection.host", "localhost")
+      .set("spark.cassandra.connection.host", "127.0.0.1")
+      .set("spark.cassandra.connection.port", "8003")
       .setMaster("local[4]")
       .setAppName("TruenoPR")
 
@@ -83,11 +84,11 @@ object TruenoPR extends SparkJob {
 
     Try(config.getString("source.string"))
       .map(x => SparkJobValid)
-      .getOrElse(SparkJobInvalid("No vertices.string config param"))
+      .getOrElse(SparkJobInvalid("No source.string config param"))
 
     Try(config.getString("target.string"))
       .map(x => SparkJobValid)
-      .getOrElse(SparkJobInvalid("No edges.string config param"))
+      .getOrElse(SparkJobInvalid("No target.string config param"))
 
     Try(config.getString("alpha.string"))
       .map(x => SparkJobValid)
