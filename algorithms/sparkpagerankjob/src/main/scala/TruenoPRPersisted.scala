@@ -51,7 +51,7 @@ import org.apache.spark.rdd.RDD
 
 object TruenoPRPersisted extends SparkJob {
 
-  case class Results(id: String, computed: Map[String, Map[String, UDTValue]])
+  case class Results(id: String, comp: Map[String, Map[String, UDTValue]])
 
   def main(args: Array[String]) {
 
