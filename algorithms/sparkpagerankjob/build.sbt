@@ -16,3 +16,4 @@ libraryDependencies += "org.apache.spark" % "spark-sql_2.11" % "1.6.1"
 libraryDependencies += "org.apache.spark" % "spark-graphx_2.11" % "1.6.1"
 libraryDependencies += "org.consensusresearch" %% "scrypto" % "1.1.0"
 
+libraryDependencies += "com.google.guava" % "guava" % "19.0"
