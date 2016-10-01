@@ -36,7 +36,7 @@ $$$$$$$$/______   __    __   ______   _______    ______  $$$$$$$  |$$$$$$$  |
 package spark.jobserver
 
 import com.typesafe.config.{Config, ConfigFactory}
-//import com.google.commom.collect.InmutableMap
+import com.google.common.collect.ImmutableClassToInstanceMap
 import scala.util.Try
 
 /* spark references */
@@ -145,8 +145,8 @@ object TruenoPRPersisted extends SparkJob {
       Results(
         x._1.toString,
         Map("PageRank" -> Map( "result" -> UDTValue.fromMap(
-          Map("type" -> "number",
-          "value" -> x._2.toString)
+          Map("type"  -> "number",
+              "value" -> x._2.toString)
            )))
       )
 
