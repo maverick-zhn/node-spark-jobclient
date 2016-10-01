@@ -36,7 +36,6 @@ $$$$$$$$/______   __    __   ______   _______    ______  $$$$$$$  |$$$$$$$  |
 package spark.jobserver
 
 import com.typesafe.config.{Config, ConfigFactory}
-import com.google.common.collect.ImmutableClassToInstanceMap
 import scala.util.Try
 
 /* spark references */
@@ -47,11 +46,12 @@ import com.datastax.spark.connector._
 import org.apache.spark.graphx._
 import org.apache.spark.graphx.VertexRDD
 import org.apache.spark.rdd.RDD
+import com.datastax.spark.connector.UDTValue
 
 
 object TruenoPRPersisted extends SparkJob {
 
-  case class Results(id: String, comp: Map[String, Map[String, UDTValue]])
+  case class Compute(id: String, comp: Map[String, Map[String, UDTValue]])
 
   def main(args: Array[String]) {
 
@@ -101,6 +101,10 @@ object TruenoPRPersisted extends SparkJob {
     Try(config.getString("TOL.string"))
       .map(x => SparkJobValid)
       .getOrElse(SparkJobInvalid("No TOL.string config param"))
+
+    Try(config.getString("comp.string"))
+      .map(x => SparkJobValid)
+      .getOrElse(SparkJobInvalid("No comp.string config param"))
   }
 
   override def runJob(sc: SparkContext, config: Config): Any = {
@@ -114,6 +118,7 @@ object TruenoPRPersisted extends SparkJob {
     val strTarget = config.getString("target.string")
     val alpha = config.getDouble("alpha.string")
     val TOL = config.getDouble("TOL.string")
+    val strComp = config.getDouble("comp.string")
 
     /* Get table from keyspace and stored as rdd */
     val vertexRDD1: RDD[(VertexId, String)] = sc.cassandraTable(schema, strVerticesTable)
@@ -142,7 +147,7 @@ object TruenoPRPersisted extends SparkJob {
     val ranks = graph.pageRank(TOL).vertices
 
     ranks.map( x =>
-      Results(
+      Compute(
         x._1.toString,
         Map("PageRank" -> Map( "result" -> UDTValue.fromMap(
           Map("type"  -> "number",
@@ -150,8 +155,7 @@ object TruenoPRPersisted extends SparkJob {
            )))
       )
 
-    ).saveToCassandra(schema, strVerticesTable, SomeColumns(strVertexId, "comp"))
-    //ranks.collect()
+    ).saveToCassandra(schema, strVerticesTable, SomeColumns(strVertexId, strComp))
 
   }//runJob
 
