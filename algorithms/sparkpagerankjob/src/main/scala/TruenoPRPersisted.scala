@@ -105,6 +105,10 @@ object TruenoPRPersisted extends SparkJob {
     Try(config.getString("comp.string"))
       .map(x => SparkJobValid)
       .getOrElse(SparkJobInvalid("No comp.string config param"))
+
+    Try(config.getString("persisted.string"))
+      .map(x => SparkJobValid)
+      .getOrElse(SparkJobInvalid("No comp.string config param"))
   }
 
   override def runJob(sc: SparkContext, config: Config): Any = {
@@ -119,6 +123,7 @@ object TruenoPRPersisted extends SparkJob {
     val alpha = config.getDouble("alpha.string")
     val TOL = config.getDouble("TOL.string")
     val strComp = config.getString("comp.string")
+    val strPersisted = config.getString("persisted.string")
 
     /* Get table from keyspace and stored as rdd */
     val vertexRDD1: RDD[(VertexId, String)] = sc.cassandraTable(schema, strVerticesTable)
@@ -146,17 +151,23 @@ object TruenoPRPersisted extends SparkJob {
     /* Run PageRank until convergence*/
     val ranks = graph.pageRank(TOL).vertices
 
-    ranks.map( x =>
-      Compute(
-        x._1.toString,
-        Map("PageRank" -> Map( "result" -> UDTValue.fromMap(
-          Map("type"  -> "number",
+    if(strPersisted == "true") {
+      ranks.collect()
+      ranks.map(x =>
+        Compute(
+          x._1.toString,
+          Map("PageRank" -> Map("result" -> UDTValue.fromMap(
+            Map("type" -> "number",
               "value" -> x._2.toString)
-           )))
-      )
+          )))
+        )
 
-    ).saveToCassandra(schema, strVerticesTable, SomeColumns(strVertexId, strComp))
+      ).saveToCassandra(schema, strVerticesTable, SomeColumns(strVertexId, strComp))
 
+    }//if
+    else {
+      ranks.collect()
+    }
   }//runJob
 
 }//TruenoPRPersisted object
