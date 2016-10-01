@@ -118,7 +118,7 @@ object TruenoPRPersisted extends SparkJob {
     val strTarget = config.getString("target.string")
     val alpha = config.getDouble("alpha.string")
     val TOL = config.getDouble("TOL.string")
-    val strComp = config.getDouble("comp.string")
+    val strComp = config.getString("comp.string")
 
     /* Get table from keyspace and stored as rdd */
     val vertexRDD1: RDD[(VertexId, String)] = sc.cassandraTable(schema, strVerticesTable)
