@@ -149,7 +149,10 @@ object TruenoPRPersisted extends SparkJob {
     val graph = Graph(vertexSet, edgesRDD)
 
     /* Run PageRank until convergence*/
-    val ranks = graph.pageRank(TOL).vertices
+    val pageRank = graph.pageRank(TOL).cache()
+    val ranks = pageRank.vertices
+    //val ranks = graph.pageRank(TOL).vertices
+    val temp = pageRank.vertices.count()
 
     if(strPersisted == "true") {
       ranks.collect()
