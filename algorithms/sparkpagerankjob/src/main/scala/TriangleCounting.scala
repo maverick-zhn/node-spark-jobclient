@@ -108,7 +108,6 @@ object TriangleCounting extends SparkJob {
 
 
     /* Collect Vertices */
-    /* TODO test on Cluster */
     val vertex_collect = vertexRDD1.collect().take(100)
 
     val vertexSet = VertexRDD(vertexRDD1)
