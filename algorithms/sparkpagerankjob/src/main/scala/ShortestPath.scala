@@ -13,8 +13,8 @@ $$$$$$$$/______   __    __   ______   _______    ______  $$$$$$$  |$$$$$$$  |
  */
 
 /**      In God we trust
-  * Created by: Servio Palacios on 2016.09.19.
-  * Source: TruenoPRPersist.scala
+  * Created by: Servio Palacios on 2016.11.04.
+  * Source: ShortestPath.scala
   * Author: Servio Palacios
   * Description: Spark Job Connector using REST API
   */
@@ -38,18 +38,18 @@ package spark.jobserver
 import com.typesafe.config.{Config, ConfigFactory}
 import scala.util.Try
 
-/* spark references */
+/* Spark references */
 import org.apache.spark.{SparkConf, SparkContext}
 import com.datastax.spark.connector._
 
 /* GraphX references */
 import org.apache.spark.graphx._
 import org.apache.spark.graphx.VertexRDD
+import org.apache.spark.graphx.lib.ShortestPaths
 import org.apache.spark.rdd.RDD
 import com.datastax.spark.connector.UDTValue
 
-
-object PageRankPersisted extends SparkJob {
+object ShortestPath extends SparkJob {
 
   case class Compute(id: String, comp: Map[String, Map[String, UDTValue]])
 
@@ -63,7 +63,7 @@ object PageRankPersisted extends SparkJob {
       .set("spark.cassandra.connection.host", strHost)
       .set("spark.cassandra.connection.port", strPort)
       .setMaster("local[4]")
-      .setAppName("TruenoPRPersisted")
+      .setAppName("ShortestPath")
 
     val sc = new SparkContext(conf)
 
@@ -106,21 +106,13 @@ object PageRankPersisted extends SparkJob {
       .map(x => SparkJobValid)
       .getOrElse(SparkJobInvalid("No target.string config param"))
 
-    Try(config.getString("alpha.string"))
+    Try(config.getString("origin.string"))
       .map(x => SparkJobValid)
-      .getOrElse(SparkJobInvalid("No alpha.string config param"))
+      .getOrElse(SparkJobInvalid("No origin.string config param"))
 
-    Try(config.getString("tolerance.string"))
+    Try(config.getString("destination.string"))
       .map(x => SparkJobValid)
-      .getOrElse(SparkJobInvalid("No tolerance.string config param"))
-
-    Try(config.getString("comp.string"))
-      .map(x => SparkJobValid)
-      .getOrElse(SparkJobInvalid("No comp.string config param"))
-
-    Try(config.getString("persisted.string"))
-      .map(x => SparkJobValid)
-      .getOrElse(SparkJobInvalid("No persisted.string config param"))
+      .getOrElse(SparkJobInvalid("No destination.string config param"))
   }
 
   override def runJob(sc: SparkContext, config: Config): Any = {
@@ -129,20 +121,13 @@ object PageRankPersisted extends SparkJob {
     val schema = config.getString("schema.string")
     val strVerticesTable = config.getString("vertices.string")
     val strEdgesTable = config.getString("edges.string")
-    val strVertexId = config.getString("vertexId.string")
     val strSource = config.getString("source.string")
     val strTarget = config.getString("target.string")
-    val alpha = config.getDouble("alpha.string")
-    val tolerance = config.getDouble("tolerance.string")
-    val strComp = config.getString("comp.string")
-    val strPersisted = config.getString("persisted.string")
+    val strOrigin = config.getString("origin.string")
+    val strDestination = config.getString("destination.string")
 
     /* Get table from keyspace and stored as rdd */
     val vertexRDD1: RDD[(VertexId, String)] = sc.cassandraTable(schema, strVerticesTable)
-
-    /* Get Cassandra Row and Select id */
-    val vertexCassandra: RDD[CassandraRow] = sc.cassandraTable(schema, strVerticesTable)
-      .select(strVertexId)
 
     /* Convert Cassandra Row into Spark's RDD */
     val rowsCassandra: RDD[CassandraRow] = sc.cassandraTable(schema, strEdgesTable)
@@ -160,32 +145,23 @@ object PageRankPersisted extends SparkJob {
     /* Build the initial Graph */
     val graph = Graph(vertexSet, edgesRDD)
 
-    /* Run PageRank until convergence*/
-    val pageRank = graph.pageRank(tolerance).cache()
-    val ranks = pageRank.vertices
-    //val ranks = graph.pageRank(TOL).vertices
-    val temp = pageRank.vertices.count()
+    val vidDestination: VertexId = strDestination.toLong
+    val vidOrigin: VertexId = strOrigin.toLong
 
-    if(strPersisted == "true") {
-      ranks.collect()
-      ranks.map(x =>
-        Compute(
-          x._1.toString,
-          Map("PageRank" -> Map("result" -> UDTValue.fromMap(
-            Map("type" -> "number",
-              "value" -> x._2.toString)
-          )))
-        )
+    val result = ShortestPaths.run(graph, Seq(vidDestination))
 
-      ).saveToCassandra(schema, strVerticesTable, SomeColumns(strVertexId, strComp))
+    val shortestPath = result               // result is a graph
+      .vertices                             // we get the vertices RDD
+      .filter({case(vId, _) => vId == vidOrigin})  // we filter to get only the shortest path from v1
+      .first                                // there's only one value
+      ._2                                   // the result is a tuple (v1, Map)
+      .get(vidDestination)                              // we get its shortest path to v2 as an Option object
 
-    }//if
-    else {
-      ranks.collect()
-    }
   }//runJob
 
 }//TruenoPRPersisted object
+
+
 
 
 
