@@ -66,7 +66,7 @@ import org.apache.spark.graphx.VertexRDD
 import org.apache.spark.rdd.RDD
 
 
-object TriangleCounting extends SparkJob {
+object TriangleCountingPersisted extends SparkJob {
 
 
   def main(args: Array[String]) {
@@ -134,7 +134,7 @@ object TriangleCounting extends SparkJob {
 
     /* Convert Cassandra Row into Spark's RDD */
     val rowsCassandra: RDD[CassandraRow] = sc.cassandraTable(schema, strEdgesTable)
-                       .select(strSource, strTarget)
+      .select(strSource, strTarget)
 
     /* Convert RDD into edgeRDD */
     val edgesRDD: RDD[Edge[Int]] = rowsCassandra.map(x =>
@@ -153,7 +153,7 @@ object TriangleCounting extends SparkJob {
 
     triCounts.collect()
 
-  }//runJob
+  } //runJob
 
 
-
+}

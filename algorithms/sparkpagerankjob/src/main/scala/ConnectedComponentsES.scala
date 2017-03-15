@@ -36,8 +36,6 @@ import org.apache.spark.rdd.RDD
 /* ES references */
 import org.elasticsearch.spark._
 import org.elasticsearch.spark.rdd.EsSpark
-import scala.collection.mutable.Buffer
-
 
 
 object ConnectedComponentsES extends SparkJob {
